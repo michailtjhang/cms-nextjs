@@ -1,0 +1,252 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============== USER & AUTH ==============
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String
+  image         String?
+  role          Role      @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  leads         Lead[]
+  activities    Activity[]
+  quotes        Quote[]
+  sessions      Session[]
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+// ============== LEADS ==============
+
+model Lead {
+  id            String      @id @default(cuid())
+  title         String
+  description   String?
+  value         Decimal?    @db.Decimal(12, 2)
+  status        LeadStatus  @default(NEW)
+  source        LeadSource?
+  expectedCloseDate DateTime?
+  
+  // Relations
+  contactId     String?
+  contact       Contact?    @relation(fields: [contactId], references: [id])
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  organizationId String?
+  organization  Organization? @relation(fields: [organizationId], references: [id])
+  
+  activities    Activity[]
+  quotes        Quote[]
+  products      LeadProduct[]
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model LeadProduct {
+  id          String   @id @default(cuid())
+  leadId      String
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  quantity    Int      @default(1)
+  price       Decimal  @db.Decimal(12, 2)
+  
+  createdAt   DateTime @default(now())
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL
+  NEGOTIATION
+  WON
+  LOST
+}
+
+enum LeadSource {
+  WEB
+  PHONE
+  EMAIL
+  REFERRAL
+  SOCIAL_MEDIA
+  ADVERTISEMENT
+  OTHER
+}
+
+// ============== CONTACTS ==============
+
+model Contact {
+  id            String       @id @default(cuid())
+  name          String
+  email         String?
+  phone         String?
+  jobTitle      String?
+  address       String?
+  notes         String?
+  
+  // Relations
+  organizationId String?
+  organization  Organization? @relation(fields: [organizationId], references: [id])
+  
+  leads         Lead[]
+  activities    Activity[]
+  
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model Organization {
+  id            String    @id @default(cuid())
+  name          String
+  email         String?
+  phone         String?
+  website       String?
+  industry      String?
+  address       String?
+  notes         String?
+  
+  // Relations
+  contacts      Contact[]
+  leads         Lead[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// ============== PRODUCTS ==============
+
+model Product {
+  id            String       @id @default(cuid())
+  name          String
+  sku           String?      @unique
+  description   String?
+  price         Decimal      @db.Decimal(12, 2)
+  quantity      Int          @default(0)
+  isActive      Boolean      @default(true)
+  
+  leadProducts  LeadProduct[]
+  quoteItems    QuoteItem[]
+  
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+// ============== ACTIVITIES ==============
+
+model Activity {
+  id            String       @id @default(cuid())
+  type          ActivityType
+  title         String
+  description   String?
+  dueDate       DateTime?
+  completed     Boolean      @default(false)
+  completedAt   DateTime?
+  
+  // Relations
+  userId        String
+  user          User         @relation(fields: [userId], references: [id])
+  leadId        String?
+  lead          Lead?        @relation(fields: [leadId], references: [id])
+  contactId     String?
+  contact       Contact?     @relation(fields: [contactId], references: [id])
+  
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+enum ActivityType {
+  CALL
+  MEETING
+  NOTE
+  TASK
+  EMAIL
+}
+
+// ============== QUOTES ==============
+
+model Quote {
+  id            String       @id @default(cuid())
+  quoteNumber   String       @unique
+  subject       String
+  description   String?
+  status        QuoteStatus  @default(DRAFT)
+  validUntil    DateTime?
+  subtotal      Decimal      @db.Decimal(12, 2) @default(0)
+  discount      Decimal      @db.Decimal(12, 2) @default(0)
+  tax           Decimal      @db.Decimal(12, 2) @default(0)
+  total         Decimal      @db.Decimal(12, 2) @default(0)
+  
+  // Relations
+  leadId        String?
+  lead          Lead?        @relation(fields: [leadId], references: [id])
+  userId        String
+  user          User         @relation(fields: [userId], references: [id])
+  
+  items         QuoteItem[]
+  
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model QuoteItem {
+  id          String   @id @default(cuid())
+  quoteId     String
+  quote       Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id])
+  name        String
+  description String?
+  quantity    Int      @default(1)
+  price       Decimal  @db.Decimal(12, 2)
+  total       Decimal  @db.Decimal(12, 2)
+  
+  createdAt   DateTime @default(now())
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+// ============== SETTINGS ==============
+
+model Setting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  group       String   @default("general")
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
