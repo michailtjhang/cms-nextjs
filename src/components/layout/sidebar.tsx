@@ -4,6 +4,8 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 import {
     LayoutDashboard,
     Users,
@@ -153,43 +155,34 @@ export function Sidebar({ user }: SidebarProps) {
                     })}
 
                     {/* User section */}
-                    <div
-                        className={cn(
-                            "flex items-center gap-3 px-3 py-2.5 rounded-lg",
-                            "bg-slate-800/50 mt-2"
-                        )}
-                    >
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                            <span className="text-white text-sm font-medium">
-                                {user?.name?.charAt(0)?.toUpperCase() || "U"}
-                            </span>
-                        </div>
-                        {!collapsed && (
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-white truncate">
-                                    {user?.name || "User"}
-                                </p>
-                                <p className="text-xs text-slate-400 truncate">
-                                    {user?.email}
-                                </p>
+                    {/* User section and ThemeToggle */}
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 border border-slate-700">
+                            <div className="flex items-center gap-3">
+                                <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-sm font-medium">
+                                    {user?.name?.[0] || "U"}
+                                </div>
+                                {!collapsed && (
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium truncate text-white">{user?.name || "User"}</p>
+                                        <p className="text-xs text-slate-400 truncate">{user?.email}</p>
+                                    </div>
+                                )}
                             </div>
-                        )}
+                            {!collapsed && <ThemeToggle />}
+                        </div>
+                        <Button
+                            variant="ghost"
+                            className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            onClick={() => signOut({ callbackUrl: "/login" })}
+                        >
+                            <LogOut className="h-4 w-4 mr-3" />
+                            {!collapsed && <span>Sign Out</span>}
+                        </Button>
                     </div>
 
-                    {/* Logout button */}
-                    <button
-                        onClick={() => signOut({ callbackUrl: "/login" })}
-                        className={cn(
-                            "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium",
-                            "text-slate-400 hover:text-red-400 hover:bg-slate-800",
-                            "transition-all duration-200"
-                        )}
-                    >
-                        <LogOut className="h-5 w-5 flex-shrink-0" />
-                        {!collapsed && <span>Logout</span>}
-                    </button>
                 </div>
-            </aside>
+            </aside >
         </>
     )
 }

@@ -7,71 +7,124 @@ import { Input } from "@/components/ui/input"
 import { Avatar } from "@/components/ui/avatar"
 import { Mail, Inbox, Send, Archive, Trash2, Search, Star, MoreVertical, Reply, Forward } from "lucide-react"
 import { cn, formatDate } from "@/lib/utils"
+import { sendEmail, deleteEmail, markAsRead, toggleStar } from "@/lib/actions/mail"
+import { useRouter } from "next/navigation"
 
-const initialEmails = [
-    {
-        id: 1,
-        sender: "Sarah Smith",
-        email: "sarah.smith@example.com",
-        subject: "Project Proposal - Q4 Marketing Campaign",
-        preview: "Hi there, I've attached the proposal for the Q4 marketing campaign...",
-        date: new Date(),
-        read: false,
-        starred: true,
-    },
-    {
-        id: 2,
-        sender: "Tech Solutions Inc.",
-        email: "support@techsolutions.com",
-        subject: "Invoice #10234 is ready",
-        preview: "Your latest invoice for contract #4492 is now available for viewing...",
-        date: new Date(Date.now() - 86400000), // Yesterday
-        read: true,
-        starred: false,
-    },
-    {
-        id: 3,
-        sender: "John Doe",
-        email: "john.doe@gmail.com",
-        subject: "Meeting Confirmation",
-        preview: "Confirming our meeting scheduled for tomorrow at 2 PM. See you then.",
-        date: new Date(Date.now() - 172800000), // 2 days ago
-        read: true,
-        starred: false,
-    },
-]
+interface MailClientProps {
+    initialEmails: any[]
+}
 
-export function MailClient() {
+export function MailClient({ initialEmails }: MailClientProps) {
     const [emails, setEmails] = useState(initialEmails)
-    const [selectedEmailId, setSelectedEmailId] = useState<number | null>(null)
+    const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null)
     const [searchQuery, setSearchQuery] = useState("")
     const [activeTab, setActiveTab] = useState("inbox")
+    const [isComposing, setIsComposing] = useState(false)
+    const [composeData, setComposeData] = useState({ to: "", subject: "", body: "" })
+    const router = useRouter()
 
     const selectedEmail = emails.find((e) => e.id === selectedEmailId)
 
-    const filteredEmails = emails.filter((email) =>
-        email.sender.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        email.subject.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    const filteredEmails = emails.filter((email) => {
+        const matchesSearch =
+            email.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            email.from.toLowerCase().includes(searchQuery.toLowerCase())
+
+        // Simple client-side filtering logic for now. 
+        // In real app, clicking tab should fetch from server.
+        // For simplicity, we assume initialEmails are INBOX (passed from page).
+        // If we want FULL tab support, page needs to accept ?folder=param.
+        // Let's assume passed emails match the View required, or we just filter what we have.
+        // Currently page passes "inbox".
+
+        return matchesSearch
+    })
+
+    const handleEmailClick = async (email: any) => {
+        setSelectedEmailId(email.id)
+        if (!email.read) {
+            await markAsRead(email.id)
+            router.refresh() // To update server state, though we might want optimistic UI
+            setEmails(prev => prev.map(e => e.id === email.id ? { ...e, read: true } : e))
+        }
+    }
+
+    const handleDelete = async (id: string | undefined) => {
+        if (!id) return
+        await deleteEmail(id)
+        setEmails(prev => prev.filter(e => e.id !== id))
+        setSelectedEmailId(null)
+        router.refresh()
+    }
+
+    const handleSend = async (e: React.FormEvent) => {
+        e.preventDefault()
+        await sendEmail(composeData)
+        setIsComposing(false)
+        setComposeData({ to: "", subject: "", body: "" })
+        alert("Email sent!")
+        router.refresh()
+    }
+
+    // Compose View
+    if (isComposing) {
+        return (
+            <Card className="h-[calc(100vh-12rem)] border-slate-800 bg-slate-900/50">
+                <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-xl font-semibold text-white">Compose Email</h2>
+                        <Button variant="ghost" onClick={() => setIsComposing(false)}>Cancel</Button>
+                    </div>
+                    <form onSubmit={handleSend} className="space-y-4 max-w-2xl">
+                        <Input
+                            placeholder="To"
+                            value={composeData.to}
+                            onChange={e => setComposeData({ ...composeData, to: e.target.value })}
+                            required
+                        />
+                        <Input
+                            placeholder="Subject"
+                            value={composeData.subject}
+                            onChange={e => setComposeData({ ...composeData, subject: e.target.value })}
+                            required
+                        />
+                        <textarea
+                            className="w-full h-64 bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Write your message..."
+                            value={composeData.body}
+                            onChange={e => setComposeData({ ...composeData, body: e.target.value })}
+                            required
+                        />
+                        <div className="flex justify-end">
+                            <Button type="submit">
+                                <Send className="h-4 w-4 mr-2" />
+                                Send Email
+                            </Button>
+                        </div>
+                    </form>
+                </CardContent>
+            </Card>
+        )
+    }
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-12rem)]">
             {/* Sidebar */}
             <Card className="lg:col-span-1 border-slate-800 bg-slate-900/50">
                 <CardContent className="p-4 space-y-2">
-                    <Button className="w-full mb-4 gap-2">
+                    <Button className="w-full mb-4 gap-2" onClick={() => setIsComposing(true)}>
                         <Mail className="h-4 w-4" />
                         Compose
                     </Button>
                     {[
-                        { id: "inbox", label: "Inbox", icon: Inbox, count: emails.filter(e => !e.read).length },
+                        { id: "inbox", label: "Inbox", icon: Inbox, count: initialEmails.filter(e => !e.read).length },
                         { id: "sent", label: "Sent", icon: Send },
                         { id: "archive", label: "Archive", icon: Archive },
                         { id: "trash", label: "Trash", icon: Trash2 },
                     ].map((tab) => (
                         <button
                             key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
+                            onClick={() => setActiveTab(tab.id)} // In real app, push router with ?folder=...
                             className={cn(
                                 "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
                                 activeTab === tab.id
@@ -111,7 +164,7 @@ export function MailClient() {
                     {filteredEmails.map((email) => (
                         <button
                             key={email.id}
-                            onClick={() => setSelectedEmailId(email.id)}
+                            onClick={() => handleEmailClick(email)}
                             className={cn(
                                 "w-full text-left p-4 border-b border-slate-800 hover:bg-slate-800/50 transition-colors",
                                 selectedEmailId === email.id && "bg-slate-800/80 border-l-2 border-l-blue-500",
@@ -120,18 +173,23 @@ export function MailClient() {
                         >
                             <div className="flex justify-between items-start mb-1">
                                 <span className={cn("text-sm font-medium", !email.read ? "text-white" : "text-slate-300")}>
-                                    {email.sender}
+                                    {email.from}
                                 </span>
                                 <span className="text-xs text-slate-500 whitespace-nowrap">
-                                    {formatDate(email.date)}
+                                    {formatDate(email.createdAt)}
                                 </span>
                             </div>
                             <h4 className={cn("text-sm mb-1 truncate", !email.read ? "text-white font-medium" : "text-slate-400")}>
                                 {email.subject}
                             </h4>
-                            <p className="text-xs text-slate-500 truncate">{email.preview}</p>
+                            <p className="text-xs text-slate-500 truncate">{email.body.substring(0, 50)}...</p>
                         </button>
                     ))}
+                    {filteredEmails.length === 0 && (
+                        <div className="p-8 text-center text-slate-500">
+                            No emails found
+                        </div>
+                    )}
                 </div>
             </Card>
 
@@ -147,8 +205,8 @@ export function MailClient() {
                                 <div className="flex items-center gap-2">
                                     <Button
                                         variant="ghost"
-                                        size="icon"
-                                        className="lg:hidden"
+                                        size="sm"
+                                        className="lg:hidden p-2"
                                         onClick={() => setSelectedEmailId(null)}
                                     >
                                         <Reply className="h-4 w-4" /> {/* Using Reply as Back icon placeholder */}
@@ -157,35 +215,36 @@ export function MailClient() {
                                     <Badge variant="outline" className="ml-2">Inbox</Badge>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <Button variant="ghost" size="icon">
+                                    <Button variant="ghost" size="sm" className="p-2">
                                         <Star className={cn("h-4 w-4", selectedEmail.starred ? "text-yellow-400 fill-yellow-400" : "text-slate-400")} />
                                     </Button>
-                                    <Button variant="ghost" size="icon">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="p-2"
+                                        onClick={() => handleDelete(selectedEmail.id)}
+                                    >
                                         <Trash2 className="h-4 w-4 text-slate-400" />
                                     </Button>
-                                    <Button variant="ghost" size="icon">
+                                    <Button variant="ghost" size="sm" className="p-2">
                                         <MoreVertical className="h-4 w-4 text-slate-400" />
                                     </Button>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
-                                <Avatar name={selectedEmail.sender} />
+                                <Avatar name={selectedEmail.from} />
                                 <div>
-                                    <p className="text-sm font-medium text-white">{selectedEmail.sender}</p>
-                                    <p className="text-xs text-slate-400">{selectedEmail.email}</p>
+                                    <p className="text-sm font-medium text-white">{selectedEmail.from}</p>
+                                    <p className="text-xs text-slate-400">To: {selectedEmail.to}</p>
                                 </div>
                                 <span className="ml-auto text-xs text-slate-500">
-                                    {formatDate(selectedEmail.date)}
+                                    {formatDate(selectedEmail.createdAt)}
                                 </span>
                             </div>
                         </div>
                         <div className="flex-1 p-6 text-slate-300 mx-auto w-full">
-                            <p className="leading-relaxed">
-                                {selectedEmail.preview}
-                                <br /><br />
-                                [Isi email lengkap mock...]
-                                <br /><br />
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                            <p className="leading-relaxed whitespace-pre-wrap">
+                                {selectedEmail.body}
                             </p>
                         </div>
                         <div className="p-4 border-t border-slate-800 flex gap-2">

@@ -27,6 +27,22 @@ model User {
   activities    Activity[]
   quotes        Quote[]
   sessions      Session[]
+  emails        Email[]
+}
+
+model Email {
+  id        String   @id @default(cuid())
+  subject   String
+  body      String   @db.Text
+  from      String
+  to        String
+  folder    String   @default("inbox") // inbox, sent, draft, trash, archive
+  read      Boolean  @default(false)
+  starred   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Session {
