@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select } from "@/components/ui/select"
 import { createLead, updateLead } from "@/lib/actions/leads"
-import { LeadStatus, LeadSource } from "@prisma/client"
 
 interface LeadFormModalProps {
     isOpen: boolean
@@ -18,8 +17,8 @@ interface LeadFormModalProps {
         title: string
         description?: string | null
         value?: number | string | null
-        status: LeadStatus
-        source?: LeadSource | null
+        status: string
+        source?: string | null
         contactId?: string | null
         organizationId?: string | null
     }
@@ -75,8 +74,8 @@ export function LeadFormModal({
                 title: formData.title,
                 description: formData.description || undefined,
                 value: formData.value ? parseFloat(formData.value) : undefined,
-                status: formData.status as LeadStatus,
-                source: formData.source ? (formData.source as LeadSource) : undefined,
+                status: formData.status as "NEW" | "CONTACTED" | "QUALIFIED" | "PROPOSAL" | "NEGOTIATION" | "WON" | "LOST",
+                source: formData.source ? (formData.source as "WEB" | "PHONE" | "EMAIL" | "REFERRAL" | "SOCIAL_MEDIA" | "ADVERTISEMENT" | "OTHER") : undefined,
                 contactId: formData.contactId || undefined,
                 organizationId: formData.organizationId || undefined,
             }
