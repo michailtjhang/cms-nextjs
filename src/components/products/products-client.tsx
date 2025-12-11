@@ -9,9 +9,10 @@ import { Modal } from "@/components/ui/modal"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { createProduct, deleteProduct } from "@/lib/actions/products"
+import { createProduct, deleteProduct, updateProduct } from "@/lib/actions/products"
 import { formatCurrency } from "@/lib/utils"
-import { Plus, Search, Package, Trash2, Edit } from "lucide-react"
+import { Plus, Search, Package, Trash2, Edit, MoreHorizontal } from "lucide-react"
+import { DropdownMenu } from "@/components/ui/dropdown-menu"
 
 type Product = {
     id: string
@@ -21,6 +22,8 @@ type Product = {
     price: number | string
     quantity: number
     isActive: boolean
+    createdAt: Date | string
+    updatedAt: Date | string
 }
 
 interface ProductsClientProps {
@@ -32,6 +35,7 @@ export function ProductsClient({ products }: ProductsClientProps) {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
+    const [editingId, setEditingId] = useState<string | null>(null)
     const [formData, setFormData] = useState({
         name: "",
         sku: "",
@@ -45,17 +49,45 @@ export function ProductsClient({ products }: ProductsClientProps) {
         p.sku?.toLowerCase().includes(searchQuery.toLowerCase())
     )
 
+    const handleOpenModal = () => {
+        setEditingId(null)
+        setFormData({ name: "", sku: "", description: "", price: "", quantity: "0" })
+        setIsModalOpen(true)
+    }
+
+    const handleEdit = (product: Product) => {
+        setEditingId(product.id)
+        setFormData({
+            name: product.name,
+            sku: product.sku || "",
+            description: product.description || "",
+            price: product.price.toString(),
+            quantity: product.quantity.toString(),
+        })
+        setIsModalOpen(true)
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
         try {
-            await createProduct({
-                name: formData.name,
-                sku: formData.sku || undefined,
-                description: formData.description || undefined,
-                price: parseFloat(formData.price),
-                quantity: parseInt(formData.quantity) || 0,
-            })
+            if (editingId) {
+                await updateProduct(editingId, {
+                    name: formData.name,
+                    sku: formData.sku || undefined,
+                    description: formData.description || undefined,
+                    price: parseFloat(formData.price),
+                    quantity: parseInt(formData.quantity) || 0,
+                })
+            } else {
+                await createProduct({
+                    name: formData.name,
+                    sku: formData.sku || undefined,
+                    description: formData.description || undefined,
+                    price: parseFloat(formData.price),
+                    quantity: parseInt(formData.quantity) || 0,
+                })
+            }
             setIsModalOpen(false)
             setFormData({ name: "", sku: "", description: "", price: "", quantity: "0" })
             router.refresh()
@@ -82,7 +114,7 @@ export function ProductsClient({ products }: ProductsClientProps) {
                 title="Products"
                 description="Manage your products and services catalog"
                 actions={
-                    <Button onClick={() => setIsModalOpen(true)}>
+                    <Button onClick={handleOpenModal}>
                         <Plus className="h-4 w-4" />
                         New Product
                     </Button>
@@ -145,12 +177,22 @@ export function ProductsClient({ products }: ProductsClientProps) {
                                             </Badge>
                                         </td>
                                         <td className="p-4 text-right">
-                                            <button
-                                                onClick={() => handleDelete(product.id)}
-                                                className="p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-red-400"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </button>
+                                            <DropdownMenu
+                                                trigger={<MoreHorizontal className="h-4 w-4" />}
+                                                items={[
+                                                    {
+                                                        label: "Edit",
+                                                        icon: <Edit className="h-4 w-4" />,
+                                                        onClick: () => handleEdit(product)
+                                                    },
+                                                    {
+                                                        label: "Delete",
+                                                        icon: <Trash2 className="h-4 w-4" />,
+                                                        variant: "danger",
+                                                        onClick: () => handleDelete(product.id)
+                                                    }
+                                                ]}
+                                            />
                                         </td>
                                     </tr>
                                 ))}
@@ -170,7 +212,7 @@ export function ProductsClient({ products }: ProductsClientProps) {
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                title="Create New Product"
+                title={editingId ? "Edit Product" : "Create New Product"}
                 size="lg"
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -217,7 +259,7 @@ export function ProductsClient({ products }: ProductsClientProps) {
                             Cancel
                         </Button>
                         <Button type="submit" isLoading={isLoading}>
-                            Create Product
+                            {editingId ? "Update Product" : "Create Product"}
                         </Button>
                     </div>
                 </form>

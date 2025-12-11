@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { LeadStatusBadge } from "@/components/ui/badge"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { Plus, Search, Filter } from "lucide-react"
+import { deleteLead } from "@/lib/actions/leads"
+import { DropdownMenu } from "@/components/ui/dropdown-menu"
+import { Plus, Search, Filter, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 
@@ -38,6 +40,7 @@ export function LeadsClient({ leads, contacts, organizations }: LeadsClientProps
     const [view, setView] = useState<"kanban" | "table">("kanban")
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
+    const [selectedLead, setSelectedLead] = useState<Lead | undefined>(undefined)
 
     const filteredLeads = leads.filter((lead) =>
         lead.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -45,20 +48,50 @@ export function LeadsClient({ leads, contacts, organizations }: LeadsClientProps
         lead.organization?.name.toLowerCase().includes(searchQuery.toLowerCase())
     )
 
+    const handleEdit = (lead: Lead) => {
+        // Convert dates to strings or handle type mismatch if necessary
+        // The Lead type in this file has dates as Date | string, so it should be fine if Modal expects compatible types
+        // LeadFormModal expects: lead?: { id, title, description?, value?, status, source?, contactId?, organizationId? }
+        // We need to map our Lead to that format
+        const leadForModal = {
+            id: lead.id,
+            title: lead.title,
+            description: lead.description,
+            value: lead.value,
+            status: lead.status,
+            source: lead.source,
+            contactId: lead.contact?.id,
+            organizationId: lead.organization?.id
+        }
+        setSelectedLead(leadForModal as any) // Type assertion to match what Modal expects vs this file's Lead type
+        setIsModalOpen(true)
+    }
+
+    const handleDelete = async (id: string) => {
+        if (confirm("Are you sure you want to delete this lead?")) {
+            await deleteLead(id)
+        }
+    }
+
+    const handleCreate = () => {
+        setSelectedLead(undefined)
+        setIsModalOpen(true)
+    }
+
     return (
         <div className="space-y-6">
             <PageHeader
                 title="Leads"
                 description="Manage your sales pipeline and track opportunities"
                 actions={
-                    <Button onClick={() => setIsModalOpen(true)}>
+                    <Button onClick={handleCreate}>
                         <Plus className="h-4 w-4" />
                         New Lead
                     </Button>
                 }
             />
 
-            {/* Toolbar */}
+            {/* ... Toolbar ... */}
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                 <div className="flex items-center gap-3 w-full sm:w-auto">
                     <div className="relative flex-1 sm:w-64">
@@ -70,10 +103,6 @@ export function LeadsClient({ leads, contacts, organizations }: LeadsClientProps
                             className="pl-10"
                         />
                     </div>
-                    <Button variant="outline" size="md">
-                        <Filter className="h-4 w-4" />
-                        <span className="hidden sm:inline">Filter</span>
-                    </Button>
                 </div>
                 <ViewToggle defaultView="kanban" onViewChange={setView} />
             </div>
@@ -93,6 +122,7 @@ export function LeadsClient({ leads, contacts, organizations }: LeadsClientProps
                                         <th className="text-left text-sm font-medium text-slate-400 p-4">Value</th>
                                         <th className="text-left text-sm font-medium text-slate-400 p-4">Status</th>
                                         <th className="text-left text-sm font-medium text-slate-400 p-4">Created</th>
+                                        <th className="text-right text-sm font-medium text-slate-400 p-4">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -124,11 +154,34 @@ export function LeadsClient({ leads, contacts, organizations }: LeadsClientProps
                                             <td className="p-4 text-slate-400 text-sm">
                                                 {formatDate(lead.createdAt)}
                                             </td>
+                                            <td className="p-4 text-right">
+                                                <DropdownMenu
+                                                    trigger={<MoreHorizontal className="h-4 w-4" />}
+                                                    items={[
+                                                        {
+                                                            label: "View Details",
+                                                            icon: <Eye className="h-4 w-4" />,
+                                                            onClick: () => window.location.href = `/leads/${lead.id}`
+                                                        },
+                                                        {
+                                                            label: "Edit",
+                                                            icon: <Edit className="h-4 w-4" />,
+                                                            onClick: () => handleEdit(lead)
+                                                        },
+                                                        {
+                                                            label: "Delete",
+                                                            icon: <Trash2 className="h-4 w-4" />,
+                                                            variant: "danger",
+                                                            onClick: () => handleDelete(lead.id)
+                                                        }
+                                                    ]}
+                                                />
+                                            </td>
                                         </tr>
                                     ))}
                                     {filteredLeads.length === 0 && (
                                         <tr>
-                                            <td colSpan={5} className="p-8 text-center text-slate-400">
+                                            <td colSpan={6} className="p-8 text-center text-slate-400">
                                                 No leads found. Create your first lead to get started.
                                             </td>
                                         </tr>
@@ -145,6 +198,7 @@ export function LeadsClient({ leads, contacts, organizations }: LeadsClientProps
                 onClose={() => setIsModalOpen(false)}
                 contacts={contacts}
                 organizations={organizations}
+                lead={selectedLead}
             />
         </div>
     )

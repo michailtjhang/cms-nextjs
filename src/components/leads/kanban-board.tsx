@@ -5,8 +5,9 @@ import { cn } from "@/lib/utils"
 import { formatCurrency } from "@/lib/utils"
 import { LeadStatusBadge } from "@/components/ui/badge"
 import { Avatar } from "@/components/ui/avatar"
-import { updateLeadStatus } from "@/lib/actions/leads"
-import { MoreHorizontal, GripVertical } from "lucide-react"
+import { updateLeadStatus, deleteLead } from "@/lib/actions/leads"
+import { MoreHorizontal, GripVertical, Trash2, Eye } from "lucide-react"
+import { DropdownMenu } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
 
 type Lead = {
@@ -163,9 +164,31 @@ export function KanbanBoard({ leads: initialLeads }: KanbanBoardProps) {
                                                 {formatCurrency(Number(lead.value || 0))}
                                             </p>
                                         </div>
-                                        <button className="p-1 rounded hover:bg-slate-700 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <MoreHorizontal className="h-4 w-4 text-slate-400" />
-                                        </button>
+                                        <div onClick={(e) => {
+                                            e.preventDefault()
+                                            e.stopPropagation()
+                                        }}>
+                                            <DropdownMenu
+                                                trigger={<MoreHorizontal className="h-4 w-4" />}
+                                                items={[
+                                                    {
+                                                        label: "View Details",
+                                                        icon: <Eye className="h-4 w-4" />,
+                                                        onClick: () => window.location.href = `/leads/${lead.id}`
+                                                    },
+                                                    {
+                                                        label: "Delete",
+                                                        icon: <Trash2 className="h-4 w-4" />,
+                                                        variant: "danger",
+                                                        onClick: async () => {
+                                                            if (confirm("Are you sure you want to delete this lead?")) {
+                                                                await deleteLead(lead.id)
+                                                            }
+                                                        }
+                                                    }
+                                                ]}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             ))}
