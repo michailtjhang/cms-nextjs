@@ -69,9 +69,7 @@ export function Sidebar({ user }: SidebarProps) {
             {/* Sidebar */}
             <aside
                 className={cn(
-                    "fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border",
-                    // Glassmorphism effect
-                    "bg-card/95 backdrop-blur-sm supports-[backdrop-filter]:bg-card/60",
+                    "fixed inset-y-0 left-0 z-50 flex flex-col bg-card border-r border-border",
                     "transition-all duration-300 ease-in-out",
                     collapsed ? "w-20" : "w-64",
                     mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
