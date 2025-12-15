@@ -8,8 +8,8 @@ function Card({ className, variant = "default", ...props }: CardProps) {
     return (
         <div
             className={cn(
-                "rounded-xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm",
-                variant === "gradient" && "bg-gradient-to-br from-slate-900 to-slate-800",
+                "rounded-xl border border-border bg-card text-card-foreground shadow-sm",
+                variant === "gradient" && "bg-gradient-to-br from-card to-muted",
                 className
             )}
             {...props}
@@ -24,7 +24,7 @@ function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement
 function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
     return (
         <h3
-            className={cn("text-lg font-semibold text-white", className)}
+            className={cn("text-lg font-semibold leading-none tracking-tight", className)}
             {...props}
         />
     )
@@ -32,7 +32,7 @@ function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElem
 
 function CardDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
     return (
-        <p className={cn("text-sm text-slate-400 mt-1", className)} {...props} />
+        <p className={cn("text-sm text-muted-foreground mt-1", className)} {...props} />
     )
 }
 

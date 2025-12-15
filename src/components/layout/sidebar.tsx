@@ -69,33 +69,33 @@ export function Sidebar({ user }: SidebarProps) {
             {/* Sidebar */}
             <aside
                 className={cn(
-                    "fixed inset-y-0 left-0 z-50 flex flex-col bg-slate-900 border-r border-slate-800",
+                    "fixed inset-y-0 left-0 z-50 flex flex-col bg-card border-r border-border",
                     "transition-all duration-300 ease-in-out",
                     collapsed ? "w-20" : "w-64",
                     mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
                 )}
             >
                 {/* Logo */}
-                <div className="h-16 flex items-center justify-between px-4 border-b border-slate-800">
+                <div className="h-16 flex items-center justify-between px-4 border-b border-border">
                     {!collapsed && (
                         <Link href="/dashboard" className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                                <span className="text-white font-bold text-sm">CRM</span>
+                            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                                <span className="text-primary-foreground font-bold text-sm">CRM</span>
                             </div>
-                            <span className="text-white font-semibold text-lg">NextCRM</span>
+                            <span className="font-semibold text-lg">NextCRM</span>
                         </Link>
                     )}
                     {collapsed && (
-                        <div className="h-8 w-8 mx-auto rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                            <span className="text-white font-bold text-sm">C</span>
+                        <div className="h-8 w-8 mx-auto rounded-lg bg-primary flex items-center justify-center">
+                            <span className="text-primary-foreground font-bold text-sm">C</span>
                         </div>
                     )}
                     <button
                         onClick={() => setCollapsed(!collapsed)}
                         className={cn(
-                            "hidden lg:flex p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800",
+                            "hidden lg:flex p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent",
                             "transition-all duration-200",
-                            collapsed && "absolute -right-3 top-12 bg-slate-800 border border-slate-700"
+                            collapsed && "absolute -right-3 top-12 bg-card border border-border shadow-md"
                         )}
                     >
                         <ChevronLeft
@@ -120,8 +120,8 @@ export function Sidebar({ user }: SidebarProps) {
                                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium",
                                     "transition-all duration-200",
                                     isActive
-                                        ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25"
-                                        : "text-slate-400 hover:text-white hover:bg-slate-800"
+                                        ? "bg-primary text-primary-foreground shadow-md"
+                                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
                                 )}
                             >
                                 <item.icon className="h-5 w-5 flex-shrink-0" />
@@ -132,7 +132,7 @@ export function Sidebar({ user }: SidebarProps) {
                 </nav>
 
                 {/* Bottom section */}
-                <div className="px-3 py-4 border-t border-slate-800 space-y-2">
+                <div className="px-3 py-4 border-t border-border space-y-2">
                     {bottomNavigation.map((item) => {
                         const isActive = pathname === item.href
                         return (
@@ -144,8 +144,8 @@ export function Sidebar({ user }: SidebarProps) {
                                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium",
                                     "transition-all duration-200",
                                     isActive
-                                        ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25"
-                                        : "text-slate-400 hover:text-white hover:bg-slate-800"
+                                        ? "bg-primary text-primary-foreground shadow-md"
+                                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
                                 )}
                             >
                                 <item.icon className="h-5 w-5 flex-shrink-0" />
@@ -155,17 +155,16 @@ export function Sidebar({ user }: SidebarProps) {
                     })}
 
                     {/* User section */}
-                    {/* User section and ThemeToggle */}
                     <div className="space-y-2">
-                        <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 border border-slate-700">
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-accent/50 border border-border">
                             <div className="flex items-center gap-3">
-                                <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-sm font-medium">
+                                <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-sm font-medium text-primary-foreground">
                                     {user?.name?.[0] || "U"}
                                 </div>
                                 {!collapsed && (
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium truncate text-white">{user?.name || "User"}</p>
-                                        <p className="text-xs text-slate-400 truncate">{user?.email}</p>
+                                        <p className="text-sm font-medium truncate text-foreground">{user?.name || "User"}</p>
+                                        <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
                                     </div>
                                 )}
                             </div>
@@ -173,16 +172,15 @@ export function Sidebar({ user }: SidebarProps) {
                         </div>
                         <Button
                             variant="ghost"
-                            className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
                             onClick={() => signOut({ callbackUrl: "/login" })}
                         >
                             <LogOut className="h-4 w-4 mr-3" />
                             {!collapsed && <span>Sign Out</span>}
                         </Button>
                     </div>
-
                 </div>
-            </aside >
+            </aside>
         </>
     )
 }
