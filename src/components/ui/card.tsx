@@ -8,7 +8,7 @@ function Card({ className, variant = "default", ...props }: CardProps) {
     return (
         <div
             className={cn(
-                "rounded-xl border border-border bg-card text-card-foreground shadow-sm",
+                "rounded-xl border border-border bg-card/50 text-card-foreground shadow-sm backdrop-blur-sm",
                 variant === "gradient" && "bg-gradient-to-br from-card to-muted",
                 className
             )}
