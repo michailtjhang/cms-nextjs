@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge, LeadStatusBadge } from "@/components/ui/badge"
 import { Avatar } from "@/components/ui/avatar"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { OverviewChart } from "@/components/dashboard/overview-chart"
 import {
     Users,
     DollarSign,
@@ -20,7 +21,7 @@ import {
 import Link from "next/link"
 
 async function getDashboardStats() {
-    // Current counts
+    // ... (previous stats fetching remains)
     const [
         totalLeads,
         wonLeads,
@@ -50,23 +51,11 @@ async function getDashboardStats() {
         where: { status: "WON" },
     })
 
-    // Trend calculation (vs last 30 days)
+    // ... (trend calculation remains)
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-    const prevLeads = await prisma.lead.count({
-        where: { createdAt: { lt: thirtyDaysAgo } }
-    })
-
-    // If totalLeads is 50 and 30 days ago total was 40. New leads in last 30 days = 10.
-    // Trend usually means "New leads this month vs New leads last month".
-    // Or "Total Growth". Let's do simple growth.
-    // totalLeads is ALL time.
-    // Let's get count created in last 30 days vs count created 30-60 days ago.
-
-    // Actually, simple way:
-    // leadsTrend: % increase in total leads over last month?
-    // or (Leads This Month / Leads Last Month) - 1.
+    const prevLeads = await prisma.lead.count({ where: { createdAt: { lt: thirtyDaysAgo } } })
 
     const startOfThisMonth = new Date()
     startOfThisMonth.setDate(1)
@@ -74,45 +63,60 @@ async function getDashboardStats() {
     const startOfLastMonth = new Date(startOfThisMonth)
     startOfLastMonth.setMonth(startOfLastMonth.getMonth() - 1)
 
-    const leadsThisMonth = await prisma.lead.count({
-        where: { createdAt: { gte: startOfThisMonth } }
-    })
+    // ... (more trend calc logic)
+    // Re-implement simplified trend logic to keep file cleaner if replacing block
+    // But since I am inserting chart data, I will add it here.
 
-    const leadsLastMonth = await prisma.lead.count({
+    // Revenue Chart Data (Last 6 months)
+    const sixMonthsAgo = new Date()
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
+
+    const wonLeadsForChart = await prisma.lead.findMany({
         where: {
-            createdAt: {
-                gte: startOfLastMonth,
-                lt: startOfThisMonth
-            }
+            status: "WON",
+            createdAt: { gte: sixMonthsAgo }
+        },
+        select: {
+            createdAt: true,
+            value: true
         }
     })
+
+    const chartDataMap = new Map<string, number>()
+
+    // Initialize last 6 months
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date()
+        d.setMonth(d.getMonth() - i)
+        const monthName = d.toLocaleString('default', { month: 'short' })
+        chartDataMap.set(monthName, 0)
+    }
+
+    wonLeadsForChart.forEach(lead => {
+        const monthName = lead.createdAt.toLocaleString('default', { month: 'short' })
+        // Prisma Decimal to number
+        const val = Number(lead.value) || 0
+        if (chartDataMap.has(monthName)) {
+            chartDataMap.set(monthName, (chartDataMap.get(monthName) || 0) + val)
+        }
+    })
+
+    const revenueChartData = Array.from(chartDataMap.entries()).map(([name, total]) => ({
+        name,
+        total
+    }))
+
+    // Re-run the trend logic from before effectively
+    const leadsThisMonth = await prisma.lead.count({ where: { createdAt: { gte: startOfThisMonth } } })
+    const leadsLastMonth = await prisma.lead.count({ where: { createdAt: { gte: startOfLastMonth, lt: startOfThisMonth } } })
+
+    const wonThisMonth = await prisma.lead.count({ where: { status: "WON", updatedAt: { gte: startOfThisMonth } } })
+    const wonLastMonth = await prisma.lead.count({ where: { status: "WON", updatedAt: { gte: startOfLastMonth, lt: startOfThisMonth } } })
 
     const calculateTrend = (current: number, previous: number) => {
         if (previous === 0) return current > 0 ? 100 : 0
         return Math.round(((current - previous) / previous) * 100)
     }
-
-    const leadsTrend = calculateTrend(leadsThisMonth, leadsLastMonth)
-
-    // Won Leads Trend
-    const wonThisMonth = await prisma.lead.count({
-        where: {
-            status: "WON",
-            updatedAt: { gte: startOfThisMonth } // assuming won date ~ updatedAt
-        }
-    })
-
-    const wonLastMonth = await prisma.lead.count({
-        where: {
-            status: "WON",
-            updatedAt: {
-                gte: startOfLastMonth,
-                lt: startOfThisMonth
-            }
-        }
-    })
-
-    const wonTrend = calculateTrend(wonThisMonth, wonLastMonth)
 
     return {
         totalLeads,
@@ -123,9 +127,10 @@ async function getDashboardStats() {
         recentLeads,
         recentActivities,
         trends: {
-            leads: leadsTrend,
-            won: wonTrend
-        }
+            leads: calculateTrend(leadsThisMonth, leadsLastMonth),
+            won: calculateTrend(wonThisMonth, wonLastMonth)
+        },
+        revenueChartData
     }
 }
 
@@ -179,6 +184,19 @@ export default async function DashboardPage() {
                     variant="amber"
                 />
             </div>
+
+            {/* Chart Section */}
+            <div className="grid grid-cols-1 gap-4">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Revenue Overview</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pl-2">
+                        <OverviewChart data={stats.revenueChartData} />
+                    </CardContent>
+                </Card>
+            </div>
+
 
             {/* Recent sections */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
