@@ -207,7 +207,7 @@ export default async function DashboardPage() {
                             <CardTitle>Recent Leads</CardTitle>
                             <Link
                                 href="/leads"
-                                className="text-sm text-blue-400 hover:text-blue-300"
+                                className="text-sm text-primary hover:text-primary/80"
                             >
                                 View all
                             </Link>
@@ -215,7 +215,7 @@ export default async function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         {stats.recentLeads.length === 0 ? (
-                            <p className="text-slate-400 text-sm text-center py-8">
+                            <p className="text-muted-foreground text-sm text-center py-8">
                                 No leads yet. Create your first lead to get started.
                             </p>
                         ) : (
@@ -224,14 +224,14 @@ export default async function DashboardPage() {
                                     <Link
                                         key={lead.id}
                                         href={`/leads/${lead.id}`}
-                                        className="flex items-center gap-4 p-3 rounded-lg hover:bg-slate-800/50 transition-colors"
+                                        className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors border border-transparent hover:border-border"
                                     >
                                         <Avatar name={lead.title} />
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-white truncate">
+                                            <p className="text-sm font-medium text-foreground truncate">
                                                 {lead.title}
                                             </p>
-                                            <p className="text-xs text-slate-400">
+                                            <p className="text-xs text-muted-foreground">
                                                 {lead.contact?.name || "No contact"} •{" "}
                                                 {formatCurrency(Number(lead.value || 0))}
                                             </p>
@@ -251,7 +251,7 @@ export default async function DashboardPage() {
                             <CardTitle>Recent Activities</CardTitle>
                             <Link
                                 href="/activities"
-                                className="text-sm text-blue-400 hover:text-blue-300"
+                                className="text-sm text-primary hover:text-primary/80"
                             >
                                 View all
                             </Link>
@@ -259,7 +259,7 @@ export default async function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         {stats.recentActivities.length === 0 ? (
-                            <p className="text-slate-400 text-sm text-center py-8">
+                            <p className="text-muted-foreground text-sm text-center py-8">
                                 No activities yet. Start tracking your tasks and calls.
                             </p>
                         ) : (
@@ -269,16 +269,16 @@ export default async function DashboardPage() {
                                     return (
                                         <div
                                             key={activity.id}
-                                            className="flex items-start gap-4 p-3 rounded-lg hover:bg-slate-800/50 transition-colors"
+                                            className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors border border-transparent hover:border-border"
                                         >
-                                            <div className="p-2 rounded-lg bg-slate-800">
-                                                <Icon className="h-4 w-4 text-slate-400" />
+                                            <div className="p-2 rounded-lg bg-muted">
+                                                <Icon className="h-4 w-4 text-muted-foreground" />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-medium text-white truncate">
+                                                <p className="text-sm font-medium text-foreground truncate">
                                                     {activity.title}
                                                 </p>
-                                                <p className="text-xs text-slate-400">
+                                                <p className="text-xs text-muted-foreground">
                                                     {activity.user?.name} • {formatDate(activity.createdAt)}
                                                 </p>
                                             </div>

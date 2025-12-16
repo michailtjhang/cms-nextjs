@@ -1,5 +1,6 @@
 "use client"
 
+import { useTheme } from "next-themes"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts"
 
 interface OverviewChartProps {
@@ -7,19 +8,26 @@ interface OverviewChartProps {
 }
 
 export function OverviewChart({ data }: OverviewChartProps) {
+    const { theme } = useTheme()
+    const isDark = theme === "dark"
+
     return (
         <ResponsiveContainer width="100%" height={350}>
             <BarChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={isDark ? "#334155" : "#e2e8f0"} // Slate 700 vs Slate 200
+                    vertical={false}
+                />
                 <XAxis
                     dataKey="name"
-                    stroke="#888888"
+                    stroke={isDark ? "#888888" : "#64748b"} // Slate 500 equivalent
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
                 />
                 <YAxis
-                    stroke="#888888"
+                    stroke={isDark ? "#888888" : "#64748b"}
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
@@ -27,14 +35,19 @@ export function OverviewChart({ data }: OverviewChartProps) {
                 />
                 <Tooltip
                     cursor={{ fill: 'transparent' }}
-                    contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
-                    itemStyle={{ color: '#fff' }}
+                    contentStyle={{
+                        backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                        borderColor: isDark ? '#334155' : '#e2e8f0',
+                        borderRadius: '8px',
+                        color: isDark ? '#fff' : '#0f172a'
+                    }}
+                    itemStyle={{ color: isDark ? '#fff' : '#0f172a' }}
                 />
                 <Bar
                     dataKey="total"
-                    fill="#3b82f6"
+                    fill="currentColor"
                     radius={[4, 4, 0, 0]}
-                    className="fill-blue-500"
+                    className="fill-primary"
                 />
             </BarChart>
         </ResponsiveContainer>

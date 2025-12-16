@@ -88,10 +88,10 @@ export function MailClient({ initialEmails, currentFolder }: MailClientProps) {
     // Compose View
     if (isComposing) {
         return (
-            <Card className="h-[calc(100vh-12rem)] border-slate-800 bg-slate-900/50">
+            <Card className="h-[calc(100vh-12rem)] border-border bg-card">
                 <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-xl font-semibold text-white">Compose Email</h2>
+                        <h2 className="text-xl font-semibold text-card-foreground">Compose Email</h2>
                         <Button variant="ghost" onClick={() => setIsComposing(false)}>Cancel</Button>
                     </div>
                     <form onSubmit={handleSend} className="space-y-4 max-w-2xl">
@@ -108,7 +108,7 @@ export function MailClient({ initialEmails, currentFolder }: MailClientProps) {
                             required
                         />
                         <textarea
-                            className="w-full h-64 bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full h-64 bg-background border border-input rounded-lg p-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                             placeholder="Write your message..."
                             value={composeData.body}
                             onChange={e => setComposeData({ ...composeData, body: e.target.value })}
@@ -129,7 +129,7 @@ export function MailClient({ initialEmails, currentFolder }: MailClientProps) {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-12rem)]">
             {/* Sidebar */}
-            <Card className="lg:col-span-1 border-slate-800 bg-slate-900/50">
+            <Card className="lg:col-span-1 border-border bg-card">
                 <CardContent className="p-4 space-y-2">
                     <Button className="w-full mb-4 gap-2" onClick={() => setIsComposing(true)}>
                         <Mail className="h-4 w-4" />
@@ -147,14 +147,14 @@ export function MailClient({ initialEmails, currentFolder }: MailClientProps) {
                             className={cn(
                                 "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
                                 activeTab === tab.id
-                                    ? "bg-blue-600/10 text-blue-400"
-                                    : "text-slate-400 hover:bg-slate-800"
+                                    ? "bg-primary/10 text-primary"
+                                    : "text-muted-foreground hover:bg-muted"
                             )}
                         >
                             <tab.icon className="h-4 w-4" />
                             {tab.label}
                             {tab.count !== undefined && tab.count > 0 && (
-                                <span className="ml-auto text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full">
+                                <span className="ml-auto text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
                                     {tab.count}
                                 </span>
                             )}
@@ -165,12 +165,12 @@ export function MailClient({ initialEmails, currentFolder }: MailClientProps) {
 
             {/* Email List */}
             <Card className={cn(
-                "lg:col-span-1 border-slate-800 bg-slate-900/50 flex flex-col",
+                "lg:col-span-1 border-border bg-card flex flex-col",
                 selectedEmailId ? "hidden lg:flex" : "flex"
             )}>
-                <div className="p-4 border-b border-slate-800">
+                <div className="p-4 border-b border-border">
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                             placeholder="Search mail..."
                             value={searchQuery}
@@ -185,27 +185,27 @@ export function MailClient({ initialEmails, currentFolder }: MailClientProps) {
                             key={email.id}
                             onClick={() => handleEmailClick(email)}
                             className={cn(
-                                "w-full text-left p-4 border-b border-slate-800 hover:bg-slate-800/50 transition-colors",
-                                selectedEmailId === email.id && "bg-slate-800/80 border-l-2 border-l-blue-500",
-                                !email.read && "bg-slate-800/20"
+                                "w-full text-left p-4 border-b border-border hover:bg-muted/50 transition-colors",
+                                selectedEmailId === email.id && "bg-muted border-l-2 border-l-primary",
+                                !email.read && "bg-muted/30"
                             )}
                         >
                             <div className="flex justify-between items-start mb-1">
-                                <span className={cn("text-sm font-medium", !email.read ? "text-white" : "text-slate-300")}>
+                                <span className={cn("text-sm font-medium", !email.read ? "text-foreground" : "text-muted-foreground")}>
                                     {email.from}
                                 </span>
-                                <span className="text-xs text-slate-500 whitespace-nowrap">
+                                <span className="text-xs text-muted-foreground whitespace-nowrap">
                                     {formatDate(email.createdAt)}
                                 </span>
                             </div>
-                            <h4 className={cn("text-sm mb-1 truncate", !email.read ? "text-white font-medium" : "text-slate-400")}>
+                            <h4 className={cn("text-sm mb-1 truncate", !email.read ? "text-foreground font-medium" : "text-muted-foreground")}>
                                 {email.subject}
                             </h4>
-                            <p className="text-xs text-slate-500 truncate">{email.body.substring(0, 50)}...</p>
+                            <p className="text-xs text-muted-foreground truncate">{email.body.substring(0, 50)}...</p>
                         </button>
                     ))}
                     {filteredEmails.length === 0 && (
-                        <div className="p-8 text-center text-slate-500">
+                        <div className="p-8 text-center text-muted-foreground">
                             No emails found
                         </div>
                     )}
@@ -214,12 +214,12 @@ export function MailClient({ initialEmails, currentFolder }: MailClientProps) {
 
             {/* Email Content */}
             <Card className={cn(
-                "lg:col-span-2 border-slate-800 bg-slate-900/50",
+                "lg:col-span-2 border-border bg-card",
                 selectedEmailId ? "flex" : "hidden lg:flex"
             )}>
                 {selectedEmail ? (
                     <div className="flex flex-col h-full w-full">
-                        <div className="p-6 border-b border-slate-800">
+                        <div className="p-6 border-b border-border">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-2">
                                     <Button
@@ -230,12 +230,12 @@ export function MailClient({ initialEmails, currentFolder }: MailClientProps) {
                                     >
                                         <Reply className="h-4 w-4" /> {/* Using Reply as Back icon placeholder */}
                                     </Button>
-                                    <h2 className="text-xl font-semibold text-white">{selectedEmail.subject}</h2>
+                                    <h2 className="text-xl font-semibold text-foreground">{selectedEmail.subject}</h2>
                                     <Badge variant="outline" className="ml-2">Inbox</Badge>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Button variant="ghost" size="sm" className="p-2">
-                                        <Star className={cn("h-4 w-4", selectedEmail.starred ? "text-yellow-400 fill-yellow-400" : "text-slate-400")} />
+                                        <Star className={cn("h-4 w-4", selectedEmail.starred ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground")} />
                                     </Button>
                                     <Button
                                         variant="ghost"
@@ -243,30 +243,30 @@ export function MailClient({ initialEmails, currentFolder }: MailClientProps) {
                                         className="p-2"
                                         onClick={() => handleDelete(selectedEmail.id)}
                                     >
-                                        <Trash2 className="h-4 w-4 text-slate-400" />
+                                        <Trash2 className="h-4 w-4 text-muted-foreground" />
                                     </Button>
                                     <Button variant="ghost" size="sm" className="p-2">
-                                        <MoreVertical className="h-4 w-4 text-slate-400" />
+                                        <MoreVertical className="h-4 w-4 text-muted-foreground" />
                                     </Button>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
                                 <Avatar name={selectedEmail.from} />
                                 <div>
-                                    <p className="text-sm font-medium text-white">{selectedEmail.from}</p>
-                                    <p className="text-xs text-slate-400">To: {selectedEmail.to}</p>
+                                    <p className="text-sm font-medium text-foreground">{selectedEmail.from}</p>
+                                    <p className="text-xs text-muted-foreground">To: {selectedEmail.to}</p>
                                 </div>
-                                <span className="ml-auto text-xs text-slate-500">
+                                <span className="ml-auto text-xs text-muted-foreground">
                                     {formatDate(selectedEmail.createdAt)}
                                 </span>
                             </div>
                         </div>
-                        <div className="flex-1 p-6 text-slate-300 mx-auto w-full">
+                        <div className="flex-1 p-6 text-foreground bg-card mx-auto w-full">
                             <p className="leading-relaxed whitespace-pre-wrap">
                                 {selectedEmail.body}
                             </p>
                         </div>
-                        <div className="p-4 border-t border-slate-800 flex gap-2">
+                        <div className="p-4 border-t border-border flex gap-2">
                             <Button variant="outline" className="gap-2">
                                 <Reply className="h-4 w-4" /> Reply
                             </Button>
@@ -276,7 +276,7 @@ export function MailClient({ initialEmails, currentFolder }: MailClientProps) {
                         </div>
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center h-full w-full text-slate-500">
+                    <div className="flex flex-col items-center justify-center h-full w-full text-muted-foreground">
                         <Mail className="h-12 w-12 mb-4 opacity-20" />
                         <p>Select an email to view</p>
                     </div>

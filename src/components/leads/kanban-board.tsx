@@ -104,25 +104,25 @@ export function KanbanBoard({ leads: initialLeads }: KanbanBoardProps) {
                     <div
                         key={column.id}
                         className={cn(
-                            "flex-shrink-0 w-72 bg-slate-900/50 rounded-xl border-t-2",
+                            "flex-shrink-0 w-72 bg-muted/50 rounded-xl border-t-2",
                             column.color,
-                            dragOverColumn === column.id && "ring-2 ring-blue-500/50"
+                            dragOverColumn === column.id && "ring-2 ring-primary/50"
                         )}
                         onDragOver={(e) => handleDragOver(e, column.id)}
                         onDragLeave={handleDragLeave}
                         onDrop={(e) => handleDrop(e, column.id)}
                     >
                         {/* Column Header */}
-                        <div className="p-4 border-b border-slate-800">
+                        <div className="p-4 border-b border-border">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <h3 className="font-medium text-white">{column.title}</h3>
-                                    <span className="px-2 py-0.5 text-xs rounded-full bg-slate-800 text-slate-400">
+                                    <h3 className="font-medium text-foreground">{column.title}</h3>
+                                    <span className="px-2 py-0.5 text-xs rounded-full bg-background text-muted-foreground border border-border">
                                         {columnLeads.length}
                                     </span>
                                 </div>
                             </div>
-                            <p className="text-sm text-slate-400 mt-1">
+                            <p className="text-sm text-muted-foreground mt-1">
                                 {formatCurrency(columnValue)}
                             </p>
                         </div>
@@ -135,32 +135,32 @@ export function KanbanBoard({ leads: initialLeads }: KanbanBoardProps) {
                                     draggable
                                     onDragStart={(e) => handleDragStart(e, lead)}
                                     className={cn(
-                                        "group bg-slate-800 rounded-lg p-3 cursor-grab active:cursor-grabbing",
-                                        "border border-slate-700 hover:border-slate-600",
+                                        "group bg-card rounded-lg p-3 cursor-grab active:cursor-grabbing",
+                                        "border border-border shadow-sm hover:border-primary/50",
                                         "transition-all duration-200",
                                         draggedLead?.id === lead.id && "opacity-50"
                                     )}
                                 >
                                     <div className="flex items-start gap-2">
-                                        <GripVertical className="h-4 w-4 text-slate-600 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <GripVertical className="h-4 w-4 text-muted-foreground mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity" />
                                         <div className="flex-1 min-w-0">
                                             <Link
                                                 href={`/leads/${lead.id}`}
-                                                className="text-sm font-medium text-white hover:text-blue-400 truncate block"
+                                                className="text-sm font-medium text-card-foreground hover:text-primary truncate block"
                                             >
                                                 {lead.title}
                                             </Link>
                                             {lead.contact && (
-                                                <p className="text-xs text-slate-400 mt-1 truncate">
+                                                <p className="text-xs text-muted-foreground mt-1 truncate">
                                                     {lead.contact.name}
                                                 </p>
                                             )}
                                             {lead.organization && (
-                                                <p className="text-xs text-slate-500 truncate">
+                                                <p className="text-xs text-muted-foreground truncate">
                                                     {lead.organization.name}
                                                 </p>
                                             )}
-                                            <p className="text-sm font-medium text-blue-400 mt-2">
+                                            <p className="text-sm font-medium text-primary mt-2">
                                                 {formatCurrency(Number(lead.value || 0))}
                                             </p>
                                         </div>
@@ -169,7 +169,7 @@ export function KanbanBoard({ leads: initialLeads }: KanbanBoardProps) {
                                             e.stopPropagation()
                                         }}>
                                             <DropdownMenu
-                                                trigger={<MoreHorizontal className="h-4 w-4" />}
+                                                trigger={<MoreHorizontal className="h-4 w-4 text-muted-foreground hover:text-foreground" />}
                                                 items={[
                                                     {
                                                         label: "View Details",
@@ -194,7 +194,7 @@ export function KanbanBoard({ leads: initialLeads }: KanbanBoardProps) {
                             ))}
 
                             {columnLeads.length === 0 && (
-                                <div className="flex items-center justify-center h-20 text-slate-500 text-sm">
+                                <div className="flex items-center justify-center h-20 text-muted-foreground text-sm">
                                     Drop leads here
                                 </div>
                             )}
