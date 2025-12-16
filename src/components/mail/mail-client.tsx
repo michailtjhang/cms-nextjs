@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -12,16 +13,24 @@ import { useRouter } from "next/navigation"
 
 interface MailClientProps {
     initialEmails: any[]
+    currentFolder: string
 }
 
-export function MailClient({ initialEmails }: MailClientProps) {
+export function MailClient({ initialEmails, currentFolder }: MailClientProps) {
     const [emails, setEmails] = useState(initialEmails)
     const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null)
     const [searchQuery, setSearchQuery] = useState("")
-    const [activeTab, setActiveTab] = useState("inbox")
+    const [activeTab, setActiveTab] = useState(currentFolder)
     const [isComposing, setIsComposing] = useState(false)
     const [composeData, setComposeData] = useState({ to: "", subject: "", body: "" })
     const router = useRouter()
+
+    // Sync state if props change (when navigating)
+    React.useEffect(() => {
+        setEmails(initialEmails)
+        setActiveTab(currentFolder)
+        setSelectedEmailId(null) // Reset selection on folder change
+    }, [initialEmails, currentFolder])
 
     const selectedEmail = emails.find((e) => e.id === selectedEmailId)
 
@@ -29,22 +38,21 @@ export function MailClient({ initialEmails }: MailClientProps) {
         const matchesSearch =
             email.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
             email.from.toLowerCase().includes(searchQuery.toLowerCase())
-
-        // Simple client-side filtering logic for now. 
-        // In real app, clicking tab should fetch from server.
-        // For simplicity, we assume initialEmails are INBOX (passed from page).
-        // If we want FULL tab support, page needs to accept ?folder=param.
-        // Let's assume passed emails match the View required, or we just filter what we have.
-        // Currently page passes "inbox".
-
         return matchesSearch
     })
+
+    const handleTabChange = (tabId: string) => {
+        setActiveTab(tabId)
+        router.push(`/mail?folder=${tabId}`)
+    }
+
+    // ... (rest of filtering and handlers same as before) ...
 
     const handleEmailClick = async (email: any) => {
         setSelectedEmailId(email.id)
         if (!email.read) {
             await markAsRead(email.id)
-            router.refresh() // To update server state, though we might want optimistic UI
+            router.refresh()
             setEmails(prev => prev.map(e => e.id === email.id ? { ...e, read: true } : e))
         }
     }
@@ -70,6 +78,8 @@ export function MailClient({ initialEmails }: MailClientProps) {
             setComposeData({ to: "", subject: "", body: "" })
             alert("Email sent successfully!")
             router.refresh()
+            // Optional: navigate to sent folder?
+            // router.push("/mail?folder=sent") 
         } catch (err) {
             alert("An unexpected error occurred.")
         }
@@ -126,14 +136,14 @@ export function MailClient({ initialEmails }: MailClientProps) {
                         Compose
                     </Button>
                     {[
-                        { id: "inbox", label: "Inbox", icon: Inbox, count: initialEmails.filter(e => !e.read).length },
+                        { id: "inbox", label: "Inbox", icon: Inbox, count: currentFolder === 'inbox' ? initialEmails.filter(e => !e.read).length : undefined },
                         { id: "sent", label: "Sent", icon: Send },
                         { id: "archive", label: "Archive", icon: Archive },
                         { id: "trash", label: "Trash", icon: Trash2 },
                     ].map((tab) => (
                         <button
                             key={tab.id}
-                            onClick={() => setActiveTab(tab.id)} // In real app, push router with ?folder=...
+                            onClick={() => handleTabChange(tab.id)}
                             className={cn(
                                 "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
                                 activeTab === tab.id
