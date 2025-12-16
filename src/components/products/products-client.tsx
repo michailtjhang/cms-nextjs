@@ -136,41 +136,41 @@ export function ProductsClient({ products }: ProductsClientProps) {
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                                <tr className="border-b border-slate-800">
-                                    <th className="text-left text-sm font-medium text-slate-400 p-4">Product</th>
-                                    <th className="text-left text-sm font-medium text-slate-400 p-4">SKU</th>
-                                    <th className="text-left text-sm font-medium text-slate-400 p-4">Price</th>
-                                    <th className="text-left text-sm font-medium text-slate-400 p-4">Quantity</th>
-                                    <th className="text-left text-sm font-medium text-slate-400 p-4">Status</th>
-                                    <th className="text-right text-sm font-medium text-slate-400 p-4">Actions</th>
+                                <tr className="border-b border-border">
+                                    <th className="text-left text-sm font-medium text-muted-foreground p-4">Product</th>
+                                    <th className="text-left text-sm font-medium text-muted-foreground p-4">SKU</th>
+                                    <th className="text-left text-sm font-medium text-muted-foreground p-4">Price</th>
+                                    <th className="text-left text-sm font-medium text-muted-foreground p-4">Quantity</th>
+                                    <th className="text-left text-sm font-medium text-muted-foreground p-4">Status</th>
+                                    <th className="text-right text-sm font-medium text-muted-foreground p-4">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredProducts.map((product) => (
                                     <tr
                                         key={product.id}
-                                        className="border-b border-slate-800 hover:bg-slate-800/50 transition-colors"
+                                        className="border-b border-border hover:bg-muted/50 transition-colors"
                                     >
                                         <td className="p-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="p-2 rounded-lg bg-slate-800">
-                                                    <Package className="h-5 w-5 text-slate-400" />
+                                                <div className="p-2 rounded-lg bg-muted">
+                                                    <Package className="h-5 w-5 text-muted-foreground" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-white font-medium">{product.name}</p>
+                                                    <p className="text-foreground font-medium">{product.name}</p>
                                                     {product.description && (
-                                                        <p className="text-sm text-slate-400 truncate max-w-xs">
+                                                        <p className="text-sm text-muted-foreground truncate max-w-xs">
                                                             {product.description}
                                                         </p>
                                                     )}
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-4 text-slate-300">{product.sku || "-"}</td>
-                                        <td className="p-4 text-blue-400 font-medium">
+                                        <td className="p-4 text-muted-foreground">{product.sku || "-"}</td>
+                                        <td className="p-4 text-primary font-medium">
                                             {formatCurrency(Number(product.price))}
                                         </td>
-                                        <td className="p-4 text-slate-300">{product.quantity}</td>
+                                        <td className="p-4 text-muted-foreground">{product.quantity}</td>
                                         <td className="p-4">
                                             <Badge variant={product.isActive ? "success" : "outline"}>
                                                 {product.isActive ? "Active" : "Inactive"}
@@ -178,7 +178,7 @@ export function ProductsClient({ products }: ProductsClientProps) {
                                         </td>
                                         <td className="p-4 text-right">
                                             <DropdownMenu
-                                                trigger={<MoreHorizontal className="h-4 w-4" />}
+                                                trigger={<MoreHorizontal className="h-4 w-4 text-muted-foreground hover:text-foreground" />}
                                                 items={[
                                                     {
                                                         label: "Edit",
@@ -198,7 +198,7 @@ export function ProductsClient({ products }: ProductsClientProps) {
                                 ))}
                                 {filteredProducts.length === 0 && (
                                     <tr>
-                                        <td colSpan={6} className="p-8 text-center text-slate-400">
+                                        <td colSpan={6} className="p-8 text-center text-muted-foreground">
                                             No products found. Add your first product to get started.
                                         </td>
                                     </tr>

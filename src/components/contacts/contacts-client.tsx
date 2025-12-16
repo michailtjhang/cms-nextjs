@@ -110,17 +110,17 @@ export function ContactsClient({ contacts, organizations }: ContactsClientProps)
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredContacts.map((contact) => (
-                    <Card key={contact.id} className="hover:border-slate-700 transition-colors">
+                    <Card key={contact.id} className="hover:border-primary/50 transition-colors">
                         <CardContent className="p-4">
                             <div className="flex items-start gap-4">
                                 <Avatar name={contact.name} size="lg" />
                                 <div className="flex-1 min-w-0">
-                                    <h3 className="text-white font-medium truncate">{contact.name}</h3>
+                                    <h3 className="text-foreground font-medium truncate">{contact.name}</h3>
                                     {contact.jobTitle && (
-                                        <p className="text-sm text-slate-400 truncate">{contact.jobTitle}</p>
+                                        <p className="text-sm text-muted-foreground truncate">{contact.jobTitle}</p>
                                     )}
                                     {contact.organization && (
-                                        <div className="flex items-center gap-1 mt-1 text-slate-500 text-sm">
+                                        <div className="flex items-center gap-1 mt-1 text-muted-foreground text-sm">
                                             <Building className="h-3 w-3" />
                                             {contact.organization.name}
                                         </div>
@@ -128,20 +128,20 @@ export function ContactsClient({ contacts, organizations }: ContactsClientProps)
                                 </div>
                                 <button
                                     onClick={() => handleDelete(contact.id)}
-                                    className="p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-red-400"
+                                    className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-destructive"
                                 >
                                     <Trash2 className="h-4 w-4" />
                                 </button>
                             </div>
                             <div className="mt-4 space-y-2">
                                 {contact.email && (
-                                    <div className="flex items-center gap-2 text-sm text-slate-400">
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                         <Mail className="h-4 w-4" />
                                         <span className="truncate">{contact.email}</span>
                                     </div>
                                 )}
                                 {contact.phone && (
-                                    <div className="flex items-center gap-2 text-sm text-slate-400">
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                         <Phone className="h-4 w-4" />
                                         {contact.phone}
                                     </div>
@@ -155,7 +155,7 @@ export function ContactsClient({ contacts, organizations }: ContactsClientProps)
                     </Card>
                 ))}
                 {filteredContacts.length === 0 && (
-                    <div className="col-span-full text-center py-12 text-slate-400">
+                    <div className="col-span-full text-center py-12 text-muted-foreground">
                         No contacts found. Create your first contact to get started.
                     </div>
                 )}

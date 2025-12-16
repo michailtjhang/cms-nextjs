@@ -95,7 +95,7 @@ export function LeadsClient({ leads, contacts, organizations }: LeadsClientProps
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                 <div className="flex items-center gap-3 w-full sm:w-auto">
                     <div className="relative flex-1 sm:w-64">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                             placeholder="Search leads..."
                             value={searchQuery}
@@ -116,47 +116,47 @@ export function LeadsClient({ leads, contacts, organizations }: LeadsClientProps
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="border-b border-slate-800">
-                                        <th className="text-left text-sm font-medium text-slate-400 p-4">Title</th>
-                                        <th className="text-left text-sm font-medium text-slate-400 p-4">Contact</th>
-                                        <th className="text-left text-sm font-medium text-slate-400 p-4">Value</th>
-                                        <th className="text-left text-sm font-medium text-slate-400 p-4">Status</th>
-                                        <th className="text-left text-sm font-medium text-slate-400 p-4">Created</th>
-                                        <th className="text-right text-sm font-medium text-slate-400 p-4">Actions</th>
+                                    <tr className="border-b border-border">
+                                        <th className="text-left text-sm font-medium text-muted-foreground p-4">Title</th>
+                                        <th className="text-left text-sm font-medium text-muted-foreground p-4">Contact</th>
+                                        <th className="text-left text-sm font-medium text-muted-foreground p-4">Value</th>
+                                        <th className="text-left text-sm font-medium text-muted-foreground p-4">Status</th>
+                                        <th className="text-left text-sm font-medium text-muted-foreground p-4">Created</th>
+                                        <th className="text-right text-sm font-medium text-muted-foreground p-4">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {filteredLeads.map((lead) => (
                                         <tr
                                             key={lead.id}
-                                            className="border-b border-slate-800 hover:bg-slate-800/50 transition-colors"
+                                            className="border-b border-border hover:bg-muted/50 transition-colors"
                                         >
                                             <td className="p-4">
                                                 <Link
                                                     href={`/leads/${lead.id}`}
-                                                    className="text-white font-medium hover:text-blue-400"
+                                                    className="text-foreground font-medium hover:text-primary"
                                                 >
                                                     {lead.title}
                                                 </Link>
                                                 {lead.organization && (
-                                                    <p className="text-sm text-slate-400">{lead.organization.name}</p>
+                                                    <p className="text-sm text-muted-foreground">{lead.organization.name}</p>
                                                 )}
                                             </td>
-                                            <td className="p-4 text-slate-300">
+                                            <td className="p-4 text-muted-foreground">
                                                 {lead.contact?.name || "-"}
                                             </td>
-                                            <td className="p-4 text-blue-400 font-medium">
+                                            <td className="p-4 text-primary font-medium">
                                                 {formatCurrency(Number(lead.value || 0))}
                                             </td>
                                             <td className="p-4">
                                                 <LeadStatusBadge status={lead.status} />
                                             </td>
-                                            <td className="p-4 text-slate-400 text-sm">
+                                            <td className="p-4 text-muted-foreground text-sm">
                                                 {formatDate(lead.createdAt)}
                                             </td>
                                             <td className="p-4 text-right">
                                                 <DropdownMenu
-                                                    trigger={<MoreHorizontal className="h-4 w-4" />}
+                                                    trigger={<MoreHorizontal className="h-4 w-4 text-muted-foreground hover:text-foreground" />}
                                                     items={[
                                                         {
                                                             label: "View Details",
@@ -181,7 +181,7 @@ export function LeadsClient({ leads, contacts, organizations }: LeadsClientProps
                                     ))}
                                     {filteredLeads.length === 0 && (
                                         <tr>
-                                            <td colSpan={6} className="p-8 text-center text-slate-400">
+                                            <td colSpan={6} className="p-8 text-center text-muted-foreground">
                                                 No leads found. Create your first lead to get started.
                                             </td>
                                         </tr>
