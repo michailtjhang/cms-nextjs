@@ -8,6 +8,9 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "NextCRM - Customer Relationship Management",
   description: "Modern CRM solution built with Next.js and PostgreSQL",
+  icons: {
+    icon: "/logo.png",
+  },
 }
 
 import { ThemeProvider } from "@/components/providers/theme-provider"
