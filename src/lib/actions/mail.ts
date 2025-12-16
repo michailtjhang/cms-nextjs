@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
+import nodemailer from "nodemailer"
 
 export async function getEmails(folder: string = "inbox") {
     const session = await auth()
@@ -21,27 +22,54 @@ export async function sendEmail(data: { to: string; subject: string; body: strin
     const session = await auth()
     if (!session?.user?.id) throw new Error("Unauthorized")
 
-    // In a real app, you would send via SMTP here.
-    // For now, we save to "sent" folder of sender.
+    try {
+        // 1. Send via SMTP (Real Email)
+        if (process.env.SMTP_HOST && process.env.SMTP_USER) {
+            console.log("Attempting SMTP send to:", data.to)
+            const transporter = nodemailer.createTransport({
+                host: process.env.SMTP_HOST,
+                port: parseInt(process.env.SMTP_PORT || "587"),
+                secure: process.env.SMTP_SECURE === "true",
+                auth: {
+                    user: process.env.SMTP_USER,
+                    pass: process.env.SMTP_PASS,
+                },
+                tls: {
+                    rejectUnauthorized: false
+                }
+            })
 
-    // Create "Sent" copy
-    await prisma.email.create({
-        data: {
-            from: session.user.email || "me@example.com",
-            to: data.to,
-            subject: data.subject,
-            body: data.body,
-            folder: "sent",
-            read: true,
-            userId: session.user.id
+            await transporter.verify()
+
+            await transporter.sendMail({
+                from: process.env.SMTP_FROM || session.user.email || `"NextCRM" <${process.env.SMTP_USER}>`,
+                to: data.to,
+                subject: data.subject,
+                text: data.body,
+                html: data.body.replace(/\n/g, "<br>"),
+            })
+            console.log("SMTP Send Success")
         }
-    })
 
-    // Simulate "Inbox" copy if we were sending to another user in system?
-    // Not needed unless we want to demo internal messaging between users.
-    // Let's keep it simple: just save to Sent.
+        // 2. Save to "Sent" folder in Database
+        await prisma.email.create({
+            data: {
+                from: session.user.email || "me@example.com",
+                to: data.to,
+                subject: data.subject,
+                body: data.body,
+                folder: "sent",
+                read: true,
+                userId: session.user.id
+            }
+        })
 
-    revalidatePath("/mail")
+        revalidatePath("/mail")
+        return { success: true }
+    } catch (error: any) {
+        console.error("Mail Action Error:", error)
+        throw new Error(error.message || "Failed to send email")
+    }
 }
 
 export async function deleteEmail(id: string) {
