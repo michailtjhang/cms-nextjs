@@ -20,7 +20,9 @@ export async function getEmails(folder: string = "inbox") {
 
 export async function sendEmail(data: { to: string; subject: string; body: string }) {
     const session = await auth()
-    if (!session?.user?.id) throw new Error("Unauthorized")
+    if (!session?.user?.id) {
+        return { success: false, error: "Unauthorized: Please log in." }
+    }
 
     try {
         // 1. Send via SMTP (Real Email)
@@ -68,7 +70,8 @@ export async function sendEmail(data: { to: string; subject: string; body: strin
         return { success: true }
     } catch (error: any) {
         console.error("Mail Action Error:", error)
-        throw new Error(error.message || "Failed to send email")
+        // Return reliable error string to client
+        return { success: false, error: error.message || "Failed to send email" }
     }
 }
 

@@ -59,11 +59,20 @@ export function MailClient({ initialEmails }: MailClientProps) {
 
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault()
-        await sendEmail(composeData)
-        setIsComposing(false)
-        setComposeData({ to: "", subject: "", body: "" })
-        alert("Email sent!")
-        router.refresh()
+        try {
+            const result = await sendEmail(composeData)
+            if (result && !result.success) {
+                alert(`Error: ${result.error}`)
+                return;
+            }
+            // Success
+            setIsComposing(false)
+            setComposeData({ to: "", subject: "", body: "" })
+            alert("Email sent successfully!")
+            router.refresh()
+        } catch (err) {
+            alert("An unexpected error occurred.")
+        }
     }
 
     // Compose View
